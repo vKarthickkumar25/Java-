@@ -20,12 +20,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Select;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
-public class SeleniumTasks {
+public class GuviRegistrationLocators {
 
     public static void main(String[] args) {
         // Set the path to the WebDriver executable
@@ -35,109 +31,56 @@ public class SeleniumTasks {
         WebDriver driver = new ChromeDriver();
 
         try {
-            // Perform Facebook Sign Up
-            performFacebookSignUp(driver);
+            // Navigate to the GUVI registration page
+            driver.get("https://www.guvi.in/register");
 
-            // Perform Drag and Drop
-            performDragAndDrop(driver);
-
-        } finally {
-            // Close the browser
-            driver.quit();
-        }
-    }
-
-    public static void performFacebookSignUp(WebDriver driver) {
-        try {
             // Maximize the browser window
             driver.manage().window().maximize();
 
-            // Navigate to the Facebook website
-            driver.get("https://www.facebook.com/");
+            // Using ID locators
+            WebElement fullNameById = driver.findElement(By.id("name"));
+            WebElement emailById = driver.findElement(By.id("email"));
+            WebElement passwordById = driver.findElement(By.id("password"));
+            System.out.println("Located elements by ID");
 
-            // Verify that the website has redirected to the Facebook homepage
-            WebDriverWait wait = new WebDriverWait(driver, 10);
-            wait.until(ExpectedConditions.titleContains("Facebook"));
+            // Using ClassName locators
+            WebElement fullNameByClassName = driver.findElement(By.className("form-control"));
+            WebElement emailByClassName = driver.findElement(By.className("form-control"));
+            WebElement passwordByClassName = driver.findElement(By.className("form-control"));
+            System.out.println("Located elements by ClassName");
 
-            // Click on the "Create new account" button
-            WebElement createAccountButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[@data-testid='open-registration-form-button']")));
-            createAccountButton.click();
+            // Using TagName locators
+            WebElement inputTag = driver.findElement(By.tagName("input"));
+            WebElement buttonTag = driver.findElement(By.tagName("button"));
+            System.out.println("Located elements by TagName");
 
-            // Enter the first name as "Test" and last name as "User" in the respective fields
-            WebElement firstNameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.name("firstname")));
-            firstNameField.sendKeys("Test");
+            // Using CSS Selector locators
+            WebElement fullNameByCss = driver.findElement(By.cssSelector("#name"));
+            WebElement emailByCss = driver.findElement(By.cssSelector("#email"));
+            WebElement passwordByCss = driver.findElement(By.cssSelector("#password"));
+            WebElement registerButtonByCss = driver.findElement(By.cssSelector("button[type='submit']"));
+            System.out.println("Located elements by CSS Selector");
 
-            WebElement lastNameField = driver.findElement(By.name("lastname"));
-            lastNameField.sendKeys("User");
+            // Using XPath locators
+            WebElement fullNameByXpath = driver.findElement(By.xpath("//input[@id='name']"));
+            WebElement emailByXpath = driver.findElement(By.xpath("//input[@id='email']"));
+            WebElement passwordByXpath = driver.findElement(By.xpath("//input[@id='password']"));
+            WebElement registerButtonByXpath = driver.findElement(By.xpath("//button[text()='Register']"));
+            System.out.println("Located elements by XPath");
 
-            // Enter a valid email address in the email field
-            WebElement emailField = driver.findElement(By.name("reg_email__"));
-            emailField.sendKeys("testuser@test.com");
+            // Perform actions with the located elements (e.g., sending keys)
+            fullNameById.sendKeys("Test User");
+            emailById.sendKeys("testuser@test.com");
+            passwordById.sendKeys("StrongPassword123!");
+            registerButtonByCss.click();
 
-            // Re-enter the email address in the confirmation field
-            WebElement emailConfirmationField = driver.findElement(By.name("reg_email_confirmation__"));
-            emailConfirmationField.sendKeys("testuser@test.com");
-
-            // Enter a strong password in the password field
-            WebElement passwordField = driver.findElement(By.name("reg_passwd__"));
-            passwordField.sendKeys("StrongPassword123!");
-
-            // Select the date of birth using the drop-down menus
-            Select daySelect = new Select(driver.findElement(By.id("day")));
-            daySelect.selectByVisibleText("11");
-
-            Select monthSelect = new Select(driver.findElement(By.id("month")));
-            monthSelect.selectByVisibleText("May");
-
-            Select yearSelect = new Select(driver.findElement(By.id("year")));
-            yearSelect.selectByVisibleText("1985");
-
-            // Select the gender using the radio button
-            WebElement genderRadioButton = driver.findElement(By.xpath("//input[@value='2']")); // 1 for Female, 2 for Male
-            genderRadioButton.click();
-
-            // Click on the "Sign Up" button
-            WebElement signUpButton = driver.findElement(By.name("websubmit"));
-            signUpButton.click();
-
-            // Verify that the user is successfully registered and redirected to the homepage
-            // Note: This step may not be possible without valid credentials and handling of the verification process
-            // Instead, we print a success message if no exceptions were thrown
-            System.out.println("Facebook Sign Up script executed. Please check manually for successful registration.");
+            // Print a success message
+            System.out.println("Registration form filled and submitted successfully.");
         } catch (Exception e) {
-            System.out.println("An error occurred during Facebook Sign Up: " + e.getMessage());
-        }
-    }
-
-    public static void performDragAndDrop(WebDriver driver) {
-        try {
-            // Navigate to the jQueryUI droppable website
-            driver.get("https://jqueryui.com/droppable");
-
-            // Switch to the frame containing the drag and drop elements
-            driver.switchTo().frame(driver.findElement(By.className("demo-frame")));
-
-            // Find the source element and the target element
-            WebElement sourceElement = driver.findElement(By.id("draggable"));
-            WebElement targetElement = driver.findElement(By.id("droppable"));
-
-            // Perform the drag and drop operation
-            Actions actions = new Actions(driver);
-            actions.dragAndDrop(sourceElement, targetElement).perform();
-
-            // Verify that the drag and drop operation is successful by checking the text and color property of the target element
-            String expectedText = "Dropped!";
-            String actualText = targetElement.getText();
-            String expectedColor = "rgba(255, 250, 144, 1)"; // Example color after drop (this may need to be adjusted)
-            String actualColor = targetElement.getCssValue("background-color");
-
-            if (actualText.equals(expectedText)) { // && actualColor.equals(expectedColor)
-                System.out.println("Drag and drop operation was successful.");
-            } else {
-                System.out.println("Drag and drop operation failed.");
-            }
-        } catch (Exception e) {
-            System.out.println("An error occurred during Drag and Drop: " + e.getMessage());
+            System.out.println("An error occurred: " + e.getMessage());
+        } finally {
+            // Close the browser
+            driver.quit();
         }
     }
 }
