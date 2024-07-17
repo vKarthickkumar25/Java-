@@ -1,0 +1,78 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>dropdown</groupId>
+  <artifactId>dropdown</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+public class PhpTravelsFormAutomation {
+
+    public static void main(String[] args) {
+        // Set the path to the ChromeDriver executable
+        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
+
+        WebDriver driver = new ChromeDriver();
+        WebDriverWait wait = new WebDriverWait(driver, 10);
+
+        try {
+            // Navigate to the URL
+            driver.get("https://phptravels.com/demo/");
+
+            // Maximize the browser window
+            driver.manage().window().maximize();
+
+            // Fill in the form details
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.name("first_name"))).sendKeys("Test");
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.name("last_name"))).sendKeys("User");
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.name("business_name"))).sendKeys("Test Business");
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.name("email"))).sendKeys("testuser@test.com");
+
+            // Handle sum verification (captcha)
+            WebElement captchaElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#numb1 + span")));
+            int num1 = Integer.parseInt(captchaElement.getText().trim());
+            captchaElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div#numb2 + span")));
+            int num2 = Integer.parseInt(captchaElement.getText().trim());
+            int sum = num1 + num2;
+
+            WebElement captchaInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("number")));
+            captchaInput.sendKeys(String.valueOf(sum));
+
+            // Submit the form
+            WebElement submitButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("demo")));
+            submitButton.click();
+
+            // Verify that the form is submitted successfully by checking the message displayed
+            WebElement confirmationMessage = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".success_message")));
+            if (confirmationMessage.isDisplayed()) {
+                System.out.println("Form submitted successfully.");
+            } else {
+                System.out.println("Form submission failed.");
+            }
+
+            // Take a screenshot of the page after the form submission
+            TakesScreenshot ts = (TakesScreenshot) driver;
+            File screenshot = ts.getScreenshotAs(OutputType.FILE);
+            Files.copy(screenshot.toPath(), Paths.get("form_submission_screenshot.png"));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            // Close the browser instance
+            driver.quit();
+        }
+    }
+}
+
+</project>
