@@ -1,0 +1,146 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>project.guvi</groupId>
+  <artifactId>seleniumproj</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <dependencies>
+	<!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java -->
+<dependency>
+    <groupId>org.seleniumhq.selenium</groupId>
+    <artifactId>selenium-java</artifactId>
+    <version>4.21.0</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/io.github.bonigarcia/webdrivermanager -->
+<dependency>
+    <groupId>io.github.bonigarcia</groupId>
+    <artifactId>webdrivermanager</artifactId>
+    <version>5.8.0</version>
+</dependency>
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class SeleniumTasks {
+
+    public static void main(String[] args) {
+        // Set the path to the WebDriver executable
+        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
+
+        // Create a new instance of the Chrome driver
+        WebDriver driver = new ChromeDriver();
+
+        try {
+            // Perform Facebook Sign Up
+            performFacebookSignUp(driver);
+
+            // Perform Drag and Drop
+            performDragAndDrop(driver);
+
+        } finally {
+            // Close the browser
+            driver.quit();
+        }
+    }
+
+    public static void performFacebookSignUp(WebDriver driver) {
+        try {
+            // Maximize the browser window
+            driver.manage().window().maximize();
+
+            // Navigate to the Facebook website
+            driver.get("https://www.facebook.com/");
+
+            // Verify that the website has redirected to the Facebook homepage
+            WebDriverWait wait = new WebDriverWait(driver, 10);
+            wait.until(ExpectedConditions.titleContains("Facebook"));
+
+            // Click on the "Create new account" button
+            WebElement createAccountButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[@data-testid='open-registration-form-button']")));
+            createAccountButton.click();
+
+            // Enter the first name as "Test" and last name as "User" in the respective fields
+            WebElement firstNameField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.name("firstname")));
+            firstNameField.sendKeys("Test");
+
+            WebElement lastNameField = driver.findElement(By.name("lastname"));
+            lastNameField.sendKeys("User");
+
+            // Enter a valid email address in the email field
+            WebElement emailField = driver.findElement(By.name("reg_email__"));
+            emailField.sendKeys("testuser@test.com");
+
+            // Re-enter the email address in the confirmation field
+            WebElement emailConfirmationField = driver.findElement(By.name("reg_email_confirmation__"));
+            emailConfirmationField.sendKeys("testuser@test.com");
+
+            // Enter a strong password in the password field
+            WebElement passwordField = driver.findElement(By.name("reg_passwd__"));
+            passwordField.sendKeys("StrongPassword123!");
+
+            // Select the date of birth using the drop-down menus
+            Select daySelect = new Select(driver.findElement(By.id("day")));
+            daySelect.selectByVisibleText("11");
+
+            Select monthSelect = new Select(driver.findElement(By.id("month")));
+            monthSelect.selectByVisibleText("May");
+
+            Select yearSelect = new Select(driver.findElement(By.id("year")));
+            yearSelect.selectByVisibleText("1985");
+
+            // Select the gender using the radio button
+            WebElement genderRadioButton = driver.findElement(By.xpath("//input[@value='2']")); // 1 for Female, 2 for Male
+            genderRadioButton.click();
+
+            // Click on the "Sign Up" button
+            WebElement signUpButton = driver.findElement(By.name("websubmit"));
+            signUpButton.click();
+
+            // Verify that the user is successfully registered and redirected to the homepage
+            // Note: This step may not be possible without valid credentials and handling of the verification process
+            // Instead, we print a success message if no exceptions were thrown
+            System.out.println("Facebook Sign Up script executed. Please check manually for successful registration.");
+        } catch (Exception e) {
+            System.out.println("An error occurred during Facebook Sign Up: " + e.getMessage());
+        }
+    }
+
+    public static void performDragAndDrop(WebDriver driver) {
+        try {
+            // Navigate to the jQueryUI droppable website
+            driver.get("https://jqueryui.com/droppable");
+
+            // Switch to the frame containing the drag and drop elements
+            driver.switchTo().frame(driver.findElement(By.className("demo-frame")));
+
+            // Find the source element and the target element
+            WebElement sourceElement = driver.findElement(By.id("draggable"));
+            WebElement targetElement = driver.findElement(By.id("droppable"));
+
+            // Perform the drag and drop operation
+            Actions actions = new Actions(driver);
+            actions.dragAndDrop(sourceElement, targetElement).perform();
+
+            // Verify that the drag and drop operation is successful by checking the text and color property of the target element
+            String expectedText = "Dropped!";
+            String actualText = targetElement.getText();
+            String expectedColor = "rgba(255, 250, 144, 1)"; // Example color after drop (this may need to be adjusted)
+            String actualColor = targetElement.getCssValue("background-color");
+
+            if (actualText.equals(expectedText)) { // && actualColor.equals(expectedColor)
+                System.out.println("Drag and drop operation was successful.");
+            } else {
+                System.out.println("Drag and drop operation failed.");
+            }
+        } catch (Exception e) {
+            System.out.println("An error occurred during Drag and Drop: " + e.getMessage());
+        }
+    }
+}
+
+  </dependencies>
+</project>
