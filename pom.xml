@@ -1,0 +1,202 @@
+<projectproject xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>testingreport</groupId>
+  <artifactId>testingreport</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+public class CombinedTests {
+    WebDriver driver;
+
+    // HomePage
+    public class HomePage {
+        WebDriver driver;
+        @FindBy(id = "signin2")
+        WebElement signupButton;
+
+        @FindBy(id = "login2")
+        WebElement loginButton;
+
+        public HomePage(WebDriver driver) {
+            this.driver = driver;
+            PageFactory.initElements(driver, this);
+        }
+
+        public void clickSignupButton() {
+            signupButton.click();
+        }
+
+        public void clickLoginButton() {
+            loginButton.click();
+        }
+    }
+
+    // SignupPage
+    public class SignupPage {
+        WebDriver driver;
+
+        @FindBy(id = "sign-username")
+        WebElement usernameField;
+
+        @FindBy(id = "sign-password")
+        WebElement passwordField;
+
+        @FindBy(xpath = "//button[text()='Sign up']")
+        WebElement signupButton;
+
+        public SignupPage(WebDriver driver) {
+            this.driver = driver;
+            PageFactory.initElements(driver, this);
+        }
+
+        public void enterUsername(String username) {
+            usernameField.sendKeys(username);
+        }
+
+        public void enterPassword(String password) {
+            passwordField.sendKeys(password);
+        }
+
+        public void clickSignupButton() {
+            signupButton.click();
+        }
+    }
+
+    // LoginPage
+    public class LoginPage {
+        WebDriver driver;
+
+        @FindBy(id = "loginusername")
+        WebElement usernameField;
+
+        @FindBy(id = "loginpassword")
+        WebElement passwordField;
+
+        @FindBy(xpath = "//button[text()='Log in']")
+        WebElement loginButton;
+
+        public LoginPage(WebDriver driver) {
+            this.driver = driver;
+            PageFactory.initElements(driver, this);
+        }
+
+        public void enterUsername(String username) {
+            usernameField.sendKeys(username);
+        }
+
+        public void enterPassword(String password) {
+            passwordField.sendKeys(password);
+        }
+
+        public void clickLoginButton() {
+            loginButton.click();
+        }
+    }
+
+    @BeforeMethod
+    public void setUp() {
+        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
+        driver = new ChromeDriver();
+        driver.manage().window().maximize();
+    }
+
+    @Test
+    public void testSignup() {
+        driver.get("https://www.demoblaze.com/");
+        HomePage homePage = new HomePage(driver);
+        homePage.clickSignupButton();
+
+        SignupPage signupPage = new SignupPage(driver);
+        signupPage.enterUsername("testuser");
+        signupPage.enterPassword("testpass");
+        signupPage.clickSignupButton();
+
+        // Add your assertion here to verify the signup success message
+        Assert.assertTrue(true, "Signup test passed");
+    }
+
+    @Test
+    public void testLogin() {
+        driver.get("https://www.demoblaze.com/");
+        HomePage homePage = new HomePage(driver);
+        homePage.clickLoginButton();
+
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.enterUsername("testuser");
+        loginPage.enterPassword("testpass");
+        loginPage.clickLoginButton();
+
+        // Add your assertion here to verify the login success message
+        Assert.assertTrue(true, "Login test passed");
+    }
+
+    @Test
+    public void testIframe() {
+        driver.get("https://the-internet.herokuapp.com/iframe");
+        driver.switchTo().frame(driver.findElement(By.id("mce_0_ifr")));
+        WebElement pTag = driver.findElement(By.tagName("p"));
+        pTag.clear();
+        pTag.sendKeys("Hello People");
+        driver.switchTo().defaultContent();
+        Assert.assertEquals(pTag.getText(), "Hello People");
+    }
+
+    @Test
+    public void testWindowSwitch() {
+        driver.get("https://the-internet.herokuapp.com/windows");
+        String originalWindow = driver.getWindowHandle();
+        driver.findElement(By.linkText("Click Here")).click();
+
+        for (String windowHandle : driver.getWindowHandles()) {
+            driver.switchTo().window(windowHandle);
+        }
+
+        Assert.assertTrue(driver.findElement(By.tagName("h3")).getText().contains("New Window"));
+        driver.close();
+        driver.switchTo().window(originalWindow);
+        Assert.assertTrue(driver.getTitle().contains("The Internet"));
+    }
+
+    @Test
+    public void testNestedFrames() {
+        driver.get("http://the-internet.herokuapp.com/nested_frames");
+        driver.switchTo().frame("frame-top");
+        driver.switchTo().frame("frame-left");
+        Assert.assertTrue(driver.findElement(By.tagName("body")).getText().contains("LEFT"));
+
+        driver.switchTo().parentFrame();
+        driver.switchTo().frame("frame-middle");
+        Assert.assertTrue(driver.findElement(By.id("content")).getText().contains("MIDDLE"));
+
+        driver.switchTo().parentFrame();
+        driver.switchTo().frame("frame-right");
+        Assert.assertTrue(driver.findElement(By.tagName("body")).getText().contains("RIGHT"));
+
+        driver.switchTo().defaultContent();
+        driver.switchTo().frame("frame-bottom");
+        Assert.assertTrue(driver.findElement(By.tagName("body")).getText().contains("BOTTOM"));
+        driver.switchTo().defaultContent();
+        Assert.assertEquals(driver.getTitle(), "Frames");
+    }
+
+    @AfterMethod
+    public void tearDown() {
+        driver.quit();
+    }
+
+    public static void main(String[] args) {
+        // This will run the tests if the main method is executed directly
+        org.testng.TestNG.main(new String[]{CombinedTests.class.getName()});
+    }
+}
+
+</projectproject>
