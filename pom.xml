@@ -1,0 +1,137 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>database</groupId>
+  <artifactId>database</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class EmployeeDatabaseAutomation {
+
+    public static void main(String[] args) {
+        String jdbcUrl = "jdbc:mysql://localhost:3306/your_database"; // Replace with your database URL
+        String jdbcUser = "your_username"; // Replace with your database username
+        String jdbcPassword = "your_password"; // Replace with your database password
+
+        try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUser, jdbcPassword)) {
+            // Create table and insert initial data
+            createAndPopulateTable(connection);
+
+            // Execute the required SQL queries
+            executeQueries(connection);
+
+            // Insert new employee data
+            insertNewEmployees(connection);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void createAndPopulateTable(Connection connection) throws SQLException {
+        String createTableSQL = "CREATE TABLE IF NOT EXISTS Empl (" +
+                "empno INT, ename VARCHAR(50), job VARCHAR(50), mgr INT, hiredate DATE, " +
+                "sal DECIMAL(10, 2), comm DECIMAL(10, 2), deptno INT)";
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(createTableSQL);
+
+            String insertDataSQL = "INSERT INTO Empl (empno, ename, job, mgr, hiredate, sal, comm, deptno) VALUES " +
+                    "(8369, 'SMITH', 'CLERK', 8902, '1990-12-18', 800.00, NULL, 2), " +
+                    "(8499, 'EYES', 'SALESMAN', 8698, '1991-02-20', 1600.00, 300.00, NULL), " +
+                    "(8521, 'SETH', 'SALESMAN', 8698, '1991-02-22', 1250.00, 500.00, 30), " +
+                    "(8566, 'MAHADEVAN', 'MANAGER', 8839, '1991-04-02', 2985.00, NULL, 8654), " +
+                    "(8698, 'BUILDING', 'MANAGER', 8839, '1991-05-01', 2850.00, NULL, 30), " +
+                    "(8882, 'SHIVANSH', 'MANAGER', 8839, '1991-06-09', 2450.00, NULL, 10), " +
+                    "(8888, 'SCOTT', 'ANALYST', 8566, '1992-12-09', 3000.00, NULL, 20), " +
+                    "(9011, 'AMIR', 'PRESIDENT', NULL, '1991-11-18', 5000.00, NULL, 10), " +
+                    "(9023, 'KULDEEP', 'SALESMAN', 8698, '1991-09-08', 1500.00, 0.00, 30)";
+            stmt.executeUpdate(insertDataSQL);
+        }
+    }
+
+    private static void executeQueries(Connection connection) throws SQLException {
+        // Query A: Display EName and Sal of employees whose salary is greater than or equal to 2200
+        System.out.println("Query A:");
+        try (PreparedStatement ps = connection.prepareStatement("SELECT ename, sal FROM Empl WHERE sal >= 2200");
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                System.out.println("Name: " + rs.getString("ename") + ", Salary: " + rs.getBigDecimal("sal"));
+            }
+        }
+
+        // Query B: Display details of employees who are not getting commission
+        System.out.println("\nQuery B:");
+        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Empl WHERE comm IS NULL");
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                System.out.println("Name: " + rs.getString("ename"));
+            }
+        }
+
+        // Query C: Display employee name and salary of those employees who don't have their salary in the range of 2500 to 4000
+        System.out.println("\nQuery C:");
+        try (PreparedStatement ps = connection.prepareStatement("SELECT ename, sal FROM Empl WHERE sal NOT BETWEEN 2500 AND 4000");
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                System.out.println("Name: " + rs.getString("ename") + ", Salary: " + rs.getBigDecimal("sal"));
+            }
+        }
+
+        // Query D: Display the name, job title, and salary of employees who don't have a manager
+        System.out.println("\nQuery D:");
+        try (PreparedStatement ps = connection.prepareStatement("SELECT ename, job, sal FROM Empl WHERE mgr IS NULL");
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                System.out.println("Name: " + rs.getString("ename") + ", Job: " + rs.getString("job") + ", Salary: " + rs.getBigDecimal("sal"));
+            }
+        }
+
+        // Query E: Display the name of an employee whose name contains "A" as the third alphabet
+        System.out.println("\nQuery E:");
+        try (PreparedStatement ps = connection.prepareStatement("SELECT ename FROM Empl WHERE SUBSTR(ename, 3, 1) = 'A'");
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                System.out.println("Name: " + rs.getString("ename"));
+            }
+        }
+
+        // Query F: Display the name of an employee whose name contains "T" as the last alphabet
+        System.out.println("\nQuery F:");
+        try (PreparedStatement ps = connection.prepareStatement("SELECT ename FROM Empl WHERE ename LIKE '%T'");
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                System.out.println("Name: " + rs.getString("ename"));
+            }
+        }
+    }
+
+    private static void insertNewEmployees(Connection connection) throws SQLException {
+        String insertNewEmployeeSQL = "INSERT INTO Empl (empno, ename, job, mgr, hiredate, sal, comm, deptno) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(insertNewEmployeeSQL)) {
+            // Inserting new employee records
+            insertEmployee(ps, 101, "Jenny", "Test Job", 0, "1991-01-01", 10000.00, 0.00, 1);
+            insertEmployee(ps, 102, "Jacky", "Test Job", 0, "1991-01-01", 20000.00, 0.00, 1);
+            insertEmployee(ps, 103, "Joe", "Test Job", 0, "1991-01-01", 40000.00, 0.00, 1);
+            insertEmployee(ps, 104, "John", "Test Job", 0, "1991-01-01", 80000.00, 0.00, 1);
+            insertEmployee(ps, 105, "Shameer", "Test Job", 0, "1991-01-01", 90000.00, 0.00, 1);
+        }
+    }
+
+    private static void insertEmployee(PreparedStatement ps, int empno, String ename, String job, int mgr, String hiredate, double sal, double comm, int deptno) throws SQLException {
+        ps.setInt(1, empno);
+        ps.setString(2, ename);
+        ps.setString(3, job);
+        ps.setInt(4, mgr);
+        ps.setDate(5, java.sql.Date.valueOf(hiredate));
+        ps.setDouble(6, sal);
+        ps.setDouble(7, comm);
+        ps.setInt(8, deptno);
+        ps.executeUpdate();
+    }
+}
+
+</project>
