@@ -1,0 +1,163 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>Windows</groupId>
+  <artifactId>Windows</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.safari.SafariDriver;
+
+import java.util.List;
+import java.util.Set;
+
+public class SeleniumAutomationTasks {
+
+    public static void main(String[] args) {
+        // Set the path to the WebDriver executable
+        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
+        System.setProperty("webdriver.gecko.driver", "path/to/geckodriver");
+        // Safari driver comes pre-installed with Safari 10 and later
+
+        // Task 1: Automate iframe text input
+        automateIframeTextInput("chrome"); // You can pass "firefox" or "safari" as well
+
+        // Task 2: Automate window handling
+        automateWindowHandling("chrome"); // You can pass "firefox" or "safari" as well
+
+        // Task 3: Automate nested frames
+        automateNestedFrames("chrome"); // You can pass "firefox" or "safari" as well
+    }
+
+    public static void automateIframeTextInput(String browser) {
+        WebDriver driver = getDriver(browser);
+        try {
+            driver.get("https://the-internet.herokuapp.com/iframe");
+
+            driver.manage().window().maximize();
+
+            driver.switchTo().frame(driver.findElement(By.cssSelector("iframe[id='mce_0_ifr']")));
+
+            WebElement pTag = driver.findElement(By.cssSelector("body#tinymce p"));
+            pTag.clear();
+            pTag.sendKeys("Hello People");
+
+            System.out.println("Text 'Hello People' has been entered into the iframe.");
+        } catch (Exception e) {
+            System.out.println("An error occurred during iframe text input automation: " + e.getMessage());
+        } finally {
+            driver.quit();
+        }
+    }
+
+    public static void automateWindowHandling(String browser) {
+        WebDriver driver = getDriver(browser);
+        try {
+            driver.get("https://the-internet.herokuapp.com/windows");
+
+            driver.manage().window().maximize();
+
+            driver.findElement(By.linkText("Click Here")).click();
+
+            String originalWindow = driver.getWindowHandle();
+            Set<String> windows = driver.getWindowHandles();
+
+            for (String window : windows) {
+                if (!window.equals(originalWindow)) {
+                    driver.switchTo().window(window);
+                    break;
+                }
+            }
+
+            WebElement newWindowText = driver.findElement(By.cssSelector("h3"));
+            if (newWindowText.getText().equals("New Window")) {
+                System.out.println("Verified 'New Window' text is present.");
+            }
+
+            driver.close();
+            driver.switchTo().window(originalWindow);
+
+            System.out.println("Verified the original window is active.");
+        } catch (Exception e) {
+            System.out.println("An error occurred during window handling automation: " + e.getMessage());
+        } finally {
+            driver.quit();
+        }
+    }
+
+    public static void automateNestedFrames(String browser) {
+        WebDriver driver = getDriver(browser);
+        try {
+            driver.get("http://the-internet.herokuapp.com/nested_frames");
+
+            driver.manage().window().maximize();
+
+            driver.switchTo().frame("frame-top");
+
+            List<WebElement> frames = driver.findElements(By.tagName("frame"));
+            if (frames.size() == 3) {
+                System.out.println("Verified there are three frames on the page.");
+            }
+
+            driver.switchTo().frame("frame-left");
+            WebElement leftFrameText = driver.findElement(By.cssSelector("body"));
+            if (leftFrameText.getText().equals("LEFT")) {
+                System.out.println("Verified the left frame has text 'LEFT'.");
+            }
+
+            driver.switchTo().parentFrame();
+            driver.switchTo().frame("frame-middle");
+            WebElement middleFrameText = driver.findElement(By.cssSelector("div"));
+            if (middleFrameText.getText().equals("MIDDLE")) {
+                System.out.println("Verified the middle frame has text 'MIDDLE'.");
+            }
+
+            driver.switchTo().parentFrame();
+            driver.switchTo().frame("frame-right");
+            WebElement rightFrameText = driver.findElement(By.cssSelector("body"));
+            if (rightFrameText.getText().equals("RIGHT")) {
+                System.out.println("Verified the right frame has text 'RIGHT'.");
+            }
+
+            driver.switchTo().defaultContent();
+            driver.switchTo().frame("frame-bottom");
+            WebElement bottomFrameText = driver.findElement(By.cssSelector("body"));
+            if (bottomFrameText.getText().equals("BOTTOM")) {
+                System.out.println("Verified the bottom frame has text 'BOTTOM'.");
+            }
+
+            driver.switchTo().defaultContent();
+            if (driver.getTitle().equals("Frames")) {
+                System.out.println("Verified the page title is 'Frames'.");
+            }
+        } catch (Exception e) {
+            System.out.println("An error occurred during nested frames automation: " + e.getMessage());
+        } finally {
+            driver.quit();
+        }
+    }
+
+    public static WebDriver getDriver(String browser) {
+        WebDriver driver = null;
+        switch (browser.toLowerCase()) {
+            case "chrome":
+                driver = new ChromeDriver();
+                break;
+            case "firefox":
+                driver = new FirefoxDriver();
+                break;
+            case "safari":
+                driver = new SafariDriver();
+                break;
+            default:
+                System.out.println("Unsupported browser! Please use 'chrome', 'firefox', or 'safari'.");
+        }
+        return driver;
+    }
+}
+
+</project>
